@@ -27,4 +27,9 @@ public class Pauta {
     @Column(name = "criada_em", nullable = false)
     private Instant criadaEm;
 
+    public Pauta(String titulo, String descricao) {
+        this.titulo = titulo;
+        this.descricao = descricao;
+        this.criadaEm = Instant.now();
+    }
 }
