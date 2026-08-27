@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.Duration;
 
 @Service
@@ -45,6 +46,13 @@ public class SessaoVotacaoService {
                 pautaId, minutos, sessao.getFechaEm());
 
         return toResponse(sessao);
+    }
+
+    @Transactional(readOnly = true)
+    public SessaoVotacao buscarSessaoDaPauta(Long pautaId) {
+        return sessaoRepository.findByPautaId(pautaId)
+                .orElseThrow(() -> new ConflitoException(
+                        "Nao existe sessao de votacao para a pauta " + pautaId));
     }
 
     private SessaoResponse toResponse(SessaoVotacao s) {
