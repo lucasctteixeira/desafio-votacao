@@ -6,6 +6,5 @@ public record PautaResponse(
         Long id,
         String titulo,
         String descricao,
-        Instant criadaEm
-) {
+        Instant criadaEm) {
 }

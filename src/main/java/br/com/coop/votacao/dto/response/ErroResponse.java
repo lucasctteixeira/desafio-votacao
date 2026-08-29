@@ -6,6 +6,5 @@ public record ErroResponse(
         Instant horaDaRequisicao,
         int status,
         String erro,
-        String mensagem
-) {
+        String mensagem) {
 }

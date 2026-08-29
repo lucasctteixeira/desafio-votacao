@@ -26,17 +26,15 @@ public class PautaService {
     @Transactional
     public PautaResponse criar(CriarPautaRequest request) {
         Pauta pauta = new Pauta(request.titulo(), request.descricao());
-        log.info("Pauta criada: id={}, titulo='{}'", pauta.getId(), pauta.getTitulo());
         pauta = pautaRepository.save(pauta);
+        log.info("Pauta criada: id={}, titulo='{}'", pauta.getId(), pauta.getTitulo());
 
         return toResponse(pauta);
     }
 
     @Transactional(readOnly = true)
     public Pauta buscarPorId(Long id) {
-        return pautaRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException(
-                        "Pauta nao encontrada: " + id));
+        return pautaRepository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Pauta nao encontrada: " + id));
     }
 
     private PautaResponse toResponse(Pauta pauta) {

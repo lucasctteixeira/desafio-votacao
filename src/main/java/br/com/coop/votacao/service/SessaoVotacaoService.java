@@ -33,26 +33,21 @@ public class SessaoVotacaoService {
         Pauta pauta = pautaService.buscarPorId(pautaId);
 
         if (sessaoRepository.existsByPautaId(pautaId)) {
-            throw new ConflitoException("Ja existe uma sessao para a pauta " + pautaId);
+            throw new ConflitoException("Ja existe uma sessão para a pauta " + pautaId);
         }
 
-        int minutos = (request != null && request.duracaoMinutos() != null)
-                ? request.duracaoMinutos()
-                : DURACAO_PADRAO_MINUTOS;
+        int minutos = (request != null && request.duracaoMinutos() != null) ? request.duracaoMinutos() : DURACAO_PADRAO_MINUTOS;
 
         SessaoVotacao sessao = new SessaoVotacao(pauta, Duration.ofMinutes(minutos));
         sessao = sessaoRepository.save(sessao);
-        log.info("Sessao aberta: pautaId={}, duracaoMin={}, fechaEm={}",
-                pautaId, minutos, sessao.getFechaEm());
+        log.info("Sessão aberta: pautaId={}, duracaoMin={}, fechaEm={}", pautaId, minutos, sessao.getFechaEm());
 
         return toResponse(sessao);
     }
 
     @Transactional(readOnly = true)
     public SessaoVotacao buscarSessaoDaPauta(Long pautaId) {
-        return sessaoRepository.findByPautaId(pautaId)
-                .orElseThrow(() -> new ConflitoException(
-                        "Nao existe sessao de votacao para a pauta " + pautaId));
+        return sessaoRepository.findByPautaId(pautaId).orElseThrow(() -> new ConflitoException("Não existe sessão de votação para a pauta " + pautaId));
     }
 
     private SessaoResponse toResponse(SessaoVotacao s) {
