@@ -2,6 +2,7 @@ package br.com.coop.votacao.service;
 
 import br.com.coop.votacao.dto.request.CriarPautaRequest;
 import br.com.coop.votacao.dto.response.PautaResponse;
+import br.com.coop.votacao.exception.RecursoNaoEncontradoException;
 import br.com.coop.votacao.model.Pauta;
 import br.com.coop.votacao.repository.PautaRepository;
 import org.slf4j.Logger;
@@ -31,12 +32,12 @@ public class PautaService {
         return toResponse(pauta);
     }
 
-//    @Transactional(readOnly = true)
-//    public Pauta buscarPorId(Long id) {
-//        return pautaRepository.findById(id)
-//                .orElseThrow(() -> new RecursoNaoEncontradoException(
-//                        "Pauta nao encontrada: " + id));
-//    }
+    @Transactional(readOnly = true)
+    public Pauta buscarPorId(Long id) {
+        return pautaRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Pauta nao encontrada: " + id));
+    }
 
     private PautaResponse toResponse(Pauta pauta) {
         return new PautaResponse(
