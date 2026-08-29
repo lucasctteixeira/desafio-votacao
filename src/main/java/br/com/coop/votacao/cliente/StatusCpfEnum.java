@@ -1,4 +1,4 @@
-package br.com.coop.votacao.model.enums;
+package br.com.coop.votacao.cliente;
 
 public enum StatusCpfEnum {
     ABLE_TO_VOTE,

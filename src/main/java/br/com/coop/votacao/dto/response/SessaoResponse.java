@@ -7,6 +7,5 @@ public record SessaoResponse(
         Long pautaId,
         Instant abriuEm,
         Instant fechaEm,
-        boolean aberta
-) {
+        boolean aberta) {
 }

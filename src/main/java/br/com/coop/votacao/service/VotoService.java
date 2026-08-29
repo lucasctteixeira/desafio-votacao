@@ -1,5 +1,8 @@
 package br.com.coop.votacao.service;
 
+import br.com.coop.votacao.cliente.CpfValidacao;
+import br.com.coop.votacao.cliente.CpfValidacaoCliente;
+import br.com.coop.votacao.cliente.StatusCpfEnum;
 import br.com.coop.votacao.dto.request.RegistrarVotoRequest;
 import br.com.coop.votacao.dto.response.VotoResponse;
 import br.com.coop.votacao.exception.ConflitoException;
@@ -21,11 +24,13 @@ public class VotoService {
     private final VotoRepository votoRepository;
     private final PautaService pautaService;
     private final SessaoVotacaoService sessaoService;
+    private final CpfValidacaoCliente cpfValidacaoCliente;
 
-    public VotoService(VotoRepository votoRepository, PautaService pautaService, SessaoVotacaoService sessaoService) {
+    public VotoService(VotoRepository votoRepository, PautaService pautaService, SessaoVotacaoService sessaoService, CpfValidacaoCliente cpfValidacaoCliente) {
         this.votoRepository = votoRepository;
         this.pautaService = pautaService;
         this.sessaoService = sessaoService;
+        this.cpfValidacaoCliente = cpfValidacaoCliente;
     }
 
     @Transactional
@@ -34,11 +39,16 @@ public class VotoService {
 
         SessaoVotacao sessao = sessaoService.buscarSessaoDaPauta(pautaId);
         if (!sessao.estaAberta()) {
-            throw new ConflitoException("A sessao de votacao da pauta " + pautaId + " esta encerrada.");
+            throw new ConflitoException("A sessão de votacao da pauta " + pautaId + " esta encerrada.");
         }
 
         if (votoRepository.existsByPautaIdAndAssociadoId(pautaId, request.associadoId())) {
             throw new ConflitoException("O associado " + request.associadoId() + " ja votou nesta pauta.");
+        }
+
+        StatusCpfEnum status = cpfValidacaoCliente.consultarCpf(request.associadoId());
+        if (status == StatusCpfEnum.UNABLE_TO_VOTE) {
+            throw new ConflitoException("O associado " + request.associadoId() + " não esta apto a votar.");
         }
 
         Voto voto = new Voto(pauta, request.associadoId(), request.opcao());
