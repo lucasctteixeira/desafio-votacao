@@ -46,9 +46,9 @@ public class VotoService {
             throw new ConflitoException("O associado " + request.associadoId() + " ja votou nesta pauta.");
         }
 
-        StatusCpfEnum status = cpfValidacaoCliente.consultarCpf(request.associadoId());
+        StatusCpfEnum status = cpfValidacaoCliente.consultarCpf(request.cpf());
         if (status == StatusCpfEnum.UNABLE_TO_VOTE) {
-            throw new ConflitoException("O associado " + request.associadoId() + " não esta apto a votar.");
+            throw new ConflitoException("O associado do CPF: " + request.cpf() + " não esta apto a votar.");
         }
 
         Voto voto = new Voto(pauta, request.associadoId(), request.opcao());
