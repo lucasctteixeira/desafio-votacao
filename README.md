@@ -1,117 +1,141 @@
-# Votação
+# Sistema de Votação - Cooperativa
 
-## Objetivo
+API REST para gerenciar sessões de votação em assembleias de cooperativas.
+Permite cadastrar pautas, abrir sessões de votação por tempo determinado,
+receber votos de associados e contabilizar o resultado.
 
-No cooperativismo, cada associado possui um voto e as decisões são tomadas em assembleias, por votação. Imagine que você deve criar uma solução para dispositivos móveis para gerenciar e participar dessas sessões de votação.
-Essa solução deve ser executada na nuvem e promover as seguintes funcionalidades através de uma API REST:
+## Tecnologias
 
-- Cadastrar uma nova pauta
-- Abrir uma sessão de votação em uma pauta (a sessão de votação deve ficar aberta por
-  um tempo determinado na chamada de abertura ou 1 minuto por default)
-- Receber votos dos associados em pautas (os votos são apenas 'Sim'/'Não'. Cada associado
-  é identificado por um id único e pode votar apenas uma vez por pauta)
-- Contabilizar os votos e dar o resultado da votação na pauta
+- Java 21
+- Spring Boot 3.3.5
+- Spring Data JPA
+- H2 Database (em arquivo, para persistência)
+- Flyway (versionamento do schema)
+- Bean Validation (Hibernate Validator)
+- JUnit 5, Mockito e AssertJ (testes)
+- Swagger / OpenAPI (documentação da API)
+- Maven
 
-Para fins de exercício, a segurança das interfaces pode ser abstraída e qualquer chamada para as interfaces pode ser considerada como autorizada. A solução deve ser construída em java, usando Spring-boot, mas os frameworks e bibliotecas são de livre escolha (desde que não infrinja direitos de uso).
+## Como executar
 
-É importante que as pautas e os votos sejam persistidos e que não sejam perdidos com o restart da aplicação.
+Pré-requisitos: Java 21 instalado.
 
-O foco dessa avaliação é a comunicação entre o backend e o aplicativo mobile. Essa comunicação é feita através de mensagens no formato JSON, onde essas mensagens serão interpretadas pelo cliente para montar as telas onde o usuário vai interagir com o sistema. A aplicação cliente não faz parte da avaliação, apenas os componentes do servidor. O formato padrão dessas mensagens será detalhado no anexo 1.
+Na raiz do projeto, execute:
 
-## Como proceder
-
-Por favor, **CLONE** o repositório e implemente sua solução, ao final, notifique a conclusão e envie o link do seu repositório clonado no GitHub, para que possamos analisar o código implementado.
-
-Lembre de deixar todas as orientações necessárias para executar o seu código.
-
-### Tarefas bônus
-
-- Tarefa Bônus 1 - Integração com sistemas externos
-  - Criar uma Facade/Client Fake que retorna aleátoriamente se um CPF recebido é válido ou não.
-  - Caso o CPF seja inválido, a API retornará o HTTP Status 404 (Not found). Você pode usar geradores de CPF para gerar CPFs válidos
-  - Caso o CPF seja válido, a API retornará se o usuário pode (ABLE_TO_VOTE) ou não pode (UNABLE_TO_VOTE) executar a operação. Essa operação retorna resultados aleatórios, portanto um mesmo CPF pode funcionar em um teste e não funcionar no outro.
-
-```
-// CPF Ok para votar
-{
-    "status": "ABLE_TO_VOTE
-}
-// CPF Nao Ok para votar - retornar 404 no client tb
-{
-    "status": "UNABLE_TO_VOTE
-}
+```bash
+./mvnw spring-boot:run
 ```
 
-Exemplos de retorno do serviço
+A aplicação sobe em `http://localhost:8080` usando um banco H2 em arquivo,
+que persiste os dados entre reinicializações.
 
-### Tarefa Bônus 2 - Performance
+### Documentação interativa (Swagger)
 
-- Imagine que sua aplicação possa ser usada em cenários que existam centenas de
-  milhares de votos. Ela deve se comportar de maneira performática nesses
-  cenários
-- Testes de performance são uma boa maneira de garantir e observar como sua
-  aplicação se comporta
+Com a aplicação rodando, acesse:
 
-### Tarefa Bônus 3 - Versionamento da API
+http://localhost:8080/swagger-ui.html
 
-○ Como você versionaria a API da sua aplicação? Que estratégia usar?
 
-## O que será analisado
+## Endpoints
 
-- Simplicidade no design da solução (evitar over engineering)
-- Organização do código
-- Arquitetura do projeto
-- Boas práticas de programação (manutenibilidade, legibilidade etc)
-- Possíveis bugs
-- Tratamento de erros e exceções
-- Explicação breve do porquê das escolhas tomadas durante o desenvolvimento da solução
-- Uso de testes automatizados e ferramentas de qualidade
-- Limpeza do código
-- Documentação do código e da API
-- Logs da aplicação
-- Mensagens e organização dos commits
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| POST | `/pautas` | Cadastra uma nova pauta |
+| POST | `/pautas/{pautaId}/sessoes` | Abre uma sessão de votação (duração opcional, padrão 1 min) |
+| POST | `/pautas/{pautaId}/votos` | Registra um voto (SIM ou NAO) |
+| GET | `/pautas/{pautaId}/resultado` | Contabiliza e retorna o resultado |
 
-## Dicas
+### Exemplos
 
-- Teste bem sua solução, evite bugs
-- Deixe o domínio das URLs de callback passiveis de alteração via configuração, para facilitar
-  o teste tanto no emulador, quanto em dispositivos fisicos.
-  Observações importantes
-- Não inicie o teste sem sanar todas as dúvidas
-- Iremos executar a aplicação para testá-la, cuide com qualquer dependência externa e
-  deixe claro caso haja instruções especiais para execução do mesmo
-  Classificação da informação: Uso Interno
-
-## Anexo 1
-
-### Introdução
-
-A seguir serão detalhados os tipos de tela que o cliente mobile suporta, assim como os tipos de campos disponíveis para a interação do usuário.
-
-### Tipo de tela – FORMULARIO
-
-A tela do tipo FORMULARIO exibe uma coleção de campos (itens) e possui um ou dois botões de ação na parte inferior.
-
-O aplicativo envia uma requisição POST para a url informada e com o body definido pelo objeto dentro de cada botão quando o mesmo é acionado. Nos casos onde temos campos de entrada
-de dados na tela, os valores informados pelo usuário são adicionados ao corpo da requisição. Abaixo o exemplo da requisição que o aplicativo vai fazer quando o botão “Ação 1” for acionado:
-
-```
-POST http://seudominio.com/ACAO1
+Criar pauta:
+```json
+POST /pautas
 {
-    “campo1”: “valor1”,
-    “campo2”: 123,
-    “idCampoTexto”: “Texto”,
-    “idCampoNumerico: 999
-    “idCampoData”: “01/01/2000”
+  "titulo": "Reforma do estatuto",
+  "descricao": "Votacao sobre mudancas no estatuto"
 }
 ```
 
-Obs: o formato da url acima é meramente ilustrativo e não define qualquer padrão de formato.
+Abrir sessão (5 minutos):
+```json
+POST /pautas/1/sessoes
+{
+  "duracaoMinutos": 5
+}
+```
 
-### Tipo de tela – SELECAO
+Registrar voto:
+```json
+POST /pautas/1/votos
+{
+  "associadoId": "assoc-123",
+  "cpf": "52998224725",
+  "opcao": "SIM"
+}
+```
 
-A tela do tipo SELECAO exibe uma lista de opções para que o usuário.
+## Decisões técnicas
 
-O aplicativo envia uma requisição POST para a url informada e com o body definido pelo objeto dentro de cada item da lista de seleção, quando o mesmo é acionado, semelhando ao funcionamento dos botões da tela FORMULARIO.
+**Arquitetura em camadas.** Separei em controller, service, repository e model.
+Optei por um monólito em camadas em vez de microsserviços por causa do escopo
+enxuto — microsserviços seriam over-engineering aqui. A separação mantém o
+código testável e organizado.
 
-# desafio-votacao
+**Persistência com H2 em arquivo.** Usei H2 em arquivo para persistir os dados
+sem exigir dependências externas — o avaliador roda a aplicação sem instalar
+banco, e os dados sobrevivem ao restart. O schema é gerenciado pelo Flyway
+(migrations versionadas), com `ddl-auto=validate`.
+
+**Voto único e concorrência.** A regra de "um voto por associado por pauta" é
+protegida em duas camadas: uma validação no service (para dar um erro amigável)
+e uma constraint UNIQUE (pauta_id, associado_id) no banco, que garante a
+integridade mesmo sob requisições concorrentes — a validação no service sozinha
+não protege contra race conditions.
+
+**Uso de Instant (UTC).** Os timestamps usam Instant, que representa um momento
+absoluto em UTC. Isso evita ambiguidade de fuso horário numa aplicação que roda
+na nuvem; a conversão para o horário local é responsabilidade do cliente.
+
+**Contabilização no banco.** Os votos são contados via COUNT no banco, sem
+carregar os registros em memória — o que escala para grandes volumes.
+
+**Tratamento de erros centralizado.** Uso @RestControllerAdvice para converter
+exceções de domínio em respostas HTTP padronizadas: 404 (não encontrado),
+409 (conflito de regra de negócio) e 400 (validação de entrada).
+
+**Validação de CPF (bônus).** O formato do CPF é validado com @CPF (dígitos
+verificadores). 
+
+## Testes
+
+O projeto tem cobertura em três níveis:
+
+- **Unitários** dos services (com Mockito), cobrindo as regras de negócio
+- **De controller** isolados (@WebMvcTest), cobrindo a camada web e validações
+- **De integração** (@SpringBootTest), cobrindo o fluxo completo
+
+Para rodar os testes:
+
+```bash
+./mvnw test
+```
+
+## Decisões sobre dependências e evolução
+
+**Banco H2 (sem Docker).** Optei por não usar Docker/PostgreSQL para não
+introduzir dependências externas na execução — o enunciado pede cuidado com
+dependências externas, e com o H2 em arquivo o avaliador roda a aplicação
+diretamente, sem precisar instalar ou subir nada. Os dados persistem entre
+reinicializações. Em produção, a configuração por profiles permitiria apontar
+para um PostgreSQL sem alterar o código.
+
+**Versionamento de API.** As rotas poderiam ser versionadas por URI
+(ex: `/api/v1/pautas`) para permitir evoluir a API sem quebrar clientes
+existentes.
+
+**Escalabilidade.** Para volumes muito altos de votos, o registro poderia ser
+processado de forma assíncrona através de mensageria (ex: Kafka): a aplicação
+recebe o voto, responde rapidamente e grava de forma assíncrona, no ritmo que o
+banco suporta. Combinado com índices nas colunas de busca e réplicas de leitura
+para a contabilização, isso permitiria escalar para grandes volumes sem
+sobrecarregar o banco.
