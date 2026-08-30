@@ -13,6 +13,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,6 +37,9 @@ public class Voto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String cpf;
+
     @ManyToOne
     @JoinColumn(name = "pauta_id", nullable = false)
     private Pauta pauta;
@@ -48,8 +54,9 @@ public class Voto {
     @Column(name = "registrado_em", nullable = false)
     private Instant registradoEm;
 
-    public Voto(Pauta pauta, String associadoId, OpcaoVotoEnum opcao) {
+    public Voto(Pauta pauta, String associadoId, String cpf, OpcaoVotoEnum opcao) {
         this.pauta = pauta;
+        this.cpf = cpf;
         this.associadoId = associadoId;
         this.opcao = opcao;
         this.registradoEm = Instant.now();

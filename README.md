@@ -87,10 +87,11 @@ banco, e os dados sobrevivem ao restart. O schema é gerenciado pelo Flyway
 (migrations versionadas), com `ddl-auto=validate`.
 
 **Voto único e concorrência.** A regra de "um voto por associado por pauta" é
-protegida em duas camadas: uma validação no service (para dar um erro amigável)
-e uma constraint UNIQUE (pauta_id, associado_id) no banco, que garante a
-integridade mesmo sob requisições concorrentes — a validação no service sozinha
-não protege contra race conditions.
+protegida em duas camadas: validações no service (associadoId e CPF) para dar
+erros amigáveis, e constraints UNIQUE no banco — (pauta_id, associado_id) e
+(pauta_id, cpf) — que garantem a integridade mesmo sob requisições concorrentes.
+Validar também por CPF evita que a mesma pessoa vote com identificadores
+diferentes.
 
 **Uso de Instant (UTC).** Os timestamps usam Instant, que representa um momento
 absoluto em UTC. Isso evita ambiguidade de fuso horário numa aplicação que roda
@@ -104,7 +105,9 @@ exceções de domínio em respostas HTTP padronizadas: 404 (não encontrado),
 409 (conflito de regra de negócio) e 400 (validação de entrada).
 
 **Validação de CPF (bônus).** O formato do CPF é validado com @CPF (dígitos
-verificadores). 
+verificadores). O CPF é persistido junto ao voto para garantir a
+unicidade por pauta (impedindo que a mesma pessoa vote com identificadores
+diferentes).
 
 ## Testes
 
