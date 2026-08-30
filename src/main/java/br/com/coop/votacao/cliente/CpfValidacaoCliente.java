@@ -1,6 +1,7 @@
 package br.com.coop.votacao.cliente;
 
 import br.com.coop.votacao.exception.RecursoNaoEncontradoException;
+import br.com.coop.votacao.repository.VotoRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

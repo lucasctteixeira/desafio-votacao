@@ -46,12 +46,17 @@ public class VotoService {
             throw new ConflitoException("O associado " + request.associadoId() + " ja votou nesta pauta.");
         }
 
+        if (votoRepository.existsByPautaIdAndCpf(pautaId, request.cpf())) {
+            throw new ConflitoException("Este cpf " + request.cpf() + " já votou");
+        }
+
         StatusCpfEnum status = cpfValidacaoCliente.consultarCpf(request.cpf());
+
         if (status == StatusCpfEnum.UNABLE_TO_VOTE) {
             throw new ConflitoException("O associado do CPF: " + request.cpf() + " não esta apto a votar.");
         }
 
-        Voto voto = new Voto(pauta, request.associadoId(), request.opcao());
+        Voto voto = new Voto(pauta, request.associadoId(), request.cpf(), request.opcao());
         votoRepository.save(voto);
         log.info("Voto registrado: pautaId={}, associadoId={}, opcao={}",
                 pautaId, request.associadoId(), request.opcao());

@@ -55,6 +55,7 @@ public class VotoServiceTest {
         when(sessaoService.buscarSessaoDaPauta(pautaId)).thenReturn(sessao);
         when(sessao.estaAberta()).thenReturn(true);
         when(votoRepository.existsByPautaIdAndAssociadoId(pautaId, "assoc-1")).thenReturn(false);
+        when(votoRepository.existsByPautaIdAndCpf(pautaId, "52998224725")).thenReturn(false);
         when(cpfValidacaoCliente.consultarCpf("52998224725")).thenReturn(StatusCpfEnum.ABLE_TO_VOTE);
 
         votoService.registrar(pautaId, request());
@@ -98,6 +99,7 @@ public class VotoServiceTest {
         when(sessaoService.buscarSessaoDaPauta(pautaId)).thenReturn(sessao);
         when(sessao.estaAberta()).thenReturn(true);
         when(votoRepository.existsByPautaIdAndAssociadoId(pautaId, "assoc-1")).thenReturn(false);
+        when(votoRepository.existsByPautaIdAndCpf(pautaId, "52998224725")).thenReturn(false);
         when(cpfValidacaoCliente.consultarCpf("52998224725")).thenReturn(StatusCpfEnum.UNABLE_TO_VOTE);
 
         assertThatThrownBy(() -> votoService.registrar(pautaId, request()))
@@ -130,5 +132,21 @@ public class VotoServiceTest {
         VotoResponse response = votoService.contabilizar(pautaId);
 
         assertThat(response.resultado()).isEqualTo("EMPATE");
+    }
+
+    @Test
+    void deveLancarConflitoQuandoCpfJaVotou() {
+        Long pautaId = 1L;
+        when(pautaService.buscarPorId(pautaId)).thenReturn(new Pauta("Pauta", "Desc"));
+        when(sessaoService.buscarSessaoDaPauta(pautaId)).thenReturn(sessao);
+        when(sessao.estaAberta()).thenReturn(true);
+        when(votoRepository.existsByPautaIdAndAssociadoId(pautaId, "assoc-1")).thenReturn(false);
+        when(votoRepository.existsByPautaIdAndCpf(pautaId, "52998224725")).thenReturn(true);
+
+        assertThatThrownBy(() -> votoService.registrar(pautaId, request()))
+                .isInstanceOf(ConflitoException.class)
+                .hasMessageContaining("votou");
+
+        verify(votoRepository, never()).save(any());
     }
 }

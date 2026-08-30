@@ -1,0 +1,3 @@
+ALTER TABLE voto ADD COLUMN cpf VARCHAR(14) NOT NULL DEFAULT '';
+
+ALTER TABLE voto ADD CONSTRAINT uk_voto_pauta_cpf UNIQUE (pauta_id, cpf);
