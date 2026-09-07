@@ -1,12 +1,12 @@
 CREATE TABLE pauta (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     titulo VARCHAR(255) NOT NULL,
     descricao TEXT,
     criada_em TIMESTAMP NOT NULL
 );
 
 CREATE TABLE sessao_votacao (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     pauta_id BIGINT NOT NULL UNIQUE,
     abriu_em TIMESTAMP NOT NULL,
     fecha_em TIMESTAMP NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE sessao_votacao (
 );
 
 CREATE TABLE voto (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     pauta_id BIGINT NOT NULL,
     associado_id VARCHAR(255) NOT NULL,
     opcao VARCHAR(10) NOT NULL,
